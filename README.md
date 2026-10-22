@@ -22,6 +22,7 @@ Set these server-side environment variables in Vercel:
 | `SUPABASE_URL` | The API URL of the existing Nexus Supabase project |
 | `SUPABASE_PUBLISHABLE_KEY` | That project's **publishable** key; never a secret/service-role key |
 | `IMPLEMENTATION_OS_DB_SCHEMA` | `implementation_os` |
+| `AUTH_PROVIDER` | `workos` after the WorkOS OAuth provider is configured in Supabase Auth |
 | `APP_ORIGIN` | The exact public URL of this Vercel app, with `https://` and no trailing slash |
 | `AI_PROVIDER` | `NVIDIA` if using the current NVIDIA integration |
 | `AI_BASE_URL` | `https://integrate.api.nvidia.com/v1` for NVIDIA |
@@ -38,6 +39,8 @@ The original `supabase/migrations/` target an **empty, dedicated project** and m
 The isolated migrations have been applied to the existing Supabase project. The `implementation_os` schema is exposed in **Data API → Settings → Exposed schemas**. Existing schemas and table permissions were retained. This is required for `.schema('implementation_os')` queries and RPC calls to resolve.
 
 In **Authentication → URL Configuration**, add the final Vercel app URL to the allowed redirect URLs. Confirmation emails sent by Implementation OS use `APP_ORIGIN`; without this allowlist entry, new-user sign-in may return to Nexus instead. The shared project's existing Nexus user-created trigger is skipped for Implementation OS signups, so a new Implementation OS user does not get an unrelated Nexus workspace.
+
+For WorkOS sign-in, create an application in the existing WorkOS staging project and add `https://nmjoqlqmtimuefkxyxij.supabase.co/auth/v1/callback` to its redirect URIs. Enable **WorkOS** under Supabase **Authentication → Sign In / Providers** with that application's client ID, `https://api.workos.com` as the WorkOS URL, and the test API key as a server-side provider secret. Add the deployed app origin to Supabase **Authentication → URL Configuration**. Set `AUTH_PROVIDER=workos` in Vercel only after those steps. WorkOS hosts the identity flow; Supabase Auth exchanges it for a UUID-backed session used by the existing Implementation OS row-level security rules. Password signup is disabled in this mode. This is not direct AuthKit token federation or WorkOS organization-role provisioning; workspace roles remain in Implementation OS.
 
 After deployment, verify `/api/health`, sign-up/confirmation, workspace creation, a document edit, and an AI draft with a test account before inviting customer users. Do not copy `.demo/` into Supabase: it is synthetic local review data.
 

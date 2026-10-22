@@ -2066,6 +2066,21 @@ function Login({
       setBusy(false);
     }
   }
+  async function signInWithWorkOS() {
+    setBusy(true);
+    setError("");
+    try {
+      const { error } = await getAuth()!.auth.signInWithOAuth({
+        provider: "workos",
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) throw error;
+    } catch {
+      setError("WorkOS sign-in could not start. Please try again.");
+      setBusy(false);
+    }
+  }
+  const workos = config?.auth_provider === "workos";
   return (
     <main className="auth-page">
       <Logo />
@@ -2095,13 +2110,25 @@ function Login({
           <span className="icon-tint">
             <ShieldCheck size={23} />
           </span>
-          <h2>{signup ? "Create your workspace" : "Welcome back"}</h2>
+          <h2>{signup && !workos ? "Create your workspace" : "Welcome back"}</h2>
           <p>
             {config?.auth_configured
-              ? "Sign in securely with Supabase Auth."
+              ? workos
+                ? "Sign in securely with WorkOS to continue to your workspace."
+                : "Sign in securely with Supabase Auth."
               : "Connect a new Supabase project to enable account access. The isolated demo can be run locally in the meantime."}
           </p>
-          {config?.auth_configured && (
+          {workos && config?.auth_configured && (
+            <>
+              {error && <div className="error" role="alert">{error}</div>}
+              <button type="button" className="button primary full" disabled={busy} onClick={signInWithWorkOS}>
+                {busy ? <Loader2 size={16} className="spin" /> : <ShieldCheck size={16} />}
+                Continue with WorkOS
+                <ArrowRight size={16} />
+              </button>
+            </>
+          )}
+          {!workos && config?.auth_configured && (
             <>
               <label>
                 Email

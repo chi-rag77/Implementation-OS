@@ -6,6 +6,7 @@ export function createHostedConfig(): Config {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_PUBLISHABLE_KEY;
   const schema = process.env.IMPLEMENTATION_OS_DB_SCHEMA ?? "public";
+  const authProvider = process.env.AUTH_PROVIDER === "workos" ? "workos" : "password";
   if (process.env.VERCEL && !process.env.IMPLEMENTATION_OS_DB_SCHEMA)
     throw new Error("Set IMPLEMENTATION_OS_DB_SCHEMA for hosted deployments.");
   if (!/^[a-z][a-z0-9_]*$/.test(schema))
@@ -18,6 +19,7 @@ export function createHostedConfig(): Config {
 
   return {
     demo: false,
+    authProvider,
     ...createAiConfig(),
     origin,
     supabaseUrl: url,
@@ -34,7 +36,7 @@ export function createHostedConfig(): Config {
       };
     },
     signup:
-      url && key
+      url && key && authProvider !== "workos"
         ? async (email, password) => {
             const { data, error } = await userClient(url, key).auth.signUp({
               email,
