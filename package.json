@@ -1,0 +1,47 @@
+{
+  "name": "ai-implementation-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch apps/api/src/server.ts",
+    "dev:web": "vite --host 127.0.0.1",
+    "demo": "IMPLEMENTATION_OS_DEMO=1 npm run dev",
+    "seed": "tsx scripts/demo.ts seed",
+    "reset-demo": "tsx scripts/demo.ts reset",
+    "build:shared-schema": "tsx scripts/build-shared-schema.ts",
+    "build": "tsc --noEmit && vite build && esbuild apps/api/src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/api/server.js",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "worker": "tsx scripts/worker.ts",
+    "format": "prettier --write apps packages scripts tests docs '*.json' '*.ts'",
+    "start": "node dist/api/server.js"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@hono/node-server": "2.1.5",
+    "@supabase/supabase-js": "2.118.0",
+    "hono": "4.13.13",
+    "lucide-react": "1.59.0",
+    "officeparser": "8.2.0",
+    "pdfjs-dist": "6.2.108",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "@types/node": "22.19.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "concurrently": "9.2.5",
+    "esbuild": "0.28.2",
+    "prettier": "3.9.10",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "8.3.4"
+  }
+}
