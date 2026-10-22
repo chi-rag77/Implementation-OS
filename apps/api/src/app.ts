@@ -24,6 +24,7 @@ export type Identity = { id: string; email: string; repo: Repository };
 export type Config = {
   demo: boolean;
   origin: string;
+  authProvider?: "password" | "workos";
   supabaseUrl?: string;
   publishableKey?: string;
   authenticate: (token: string | undefined) => Promise<Identity | null>;
@@ -223,6 +224,7 @@ export function createApp(config: Config) {
     ok(c, {
       demo: config.demo,
       auth_configured: !!config.supabaseUrl && !!config.publishableKey,
+      auth_provider: config.authProvider ?? "password",
       supabase_url: config.supabaseUrl ?? null,
       publishable_key: config.publishableKey ?? null,
       ai_connected: !!config.generateDocument,
@@ -241,7 +243,9 @@ export function createApp(config: Config) {
       throw new ApiError(
         503,
         "AUTH_NOT_CONFIGURED",
-        "Connect a new Supabase project to enable signup.",
+        config.authProvider === "workos"
+          ? "Use WorkOS to sign in. Password signup is disabled."
+          : "Connect a new Supabase project to enable signup.",
       );
     const input = z
       .object({ email: z.email(), password: z.string().min(12).max(128) })
